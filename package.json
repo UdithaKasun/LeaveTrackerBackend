@@ -1,5 +1,5 @@
 {
-  "name": "pharmacy-solution-backend",
+  "name": "leavetracker",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/UdithaKasun/pharmacy-solution-node-backen.git"
+    "url": "git+https://github.com/UdithaKasun/LeaveTrackerBackend.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/UdithaKasun/pharmacy-solution-node-backen/issues"
+    "url": "https://github.com/UdithaKasun/LeaveTrackerBackend.git/issues"
   },
-  "homepage": "https://github.com/UdithaKasun/pharmacy-solution-node-backen#readme",
+  "homepage": "https://github.com/UdithaKasun/LeaveTrackerBackend#readme",
   "dependencies": {
     "body-parser": "1.15.0",
     "cors": "2.7.1",
