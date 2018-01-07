@@ -5,45 +5,55 @@ var Leave = mongoose.model('Leave');
 var User = mongoose.model('User');
 var auth = require('../auth');
 
-//Add a new leave to the database
+//Add new leaves to the database
 router.post('/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
-    if (!req.body.leave.user_id) {
-      return res.status(422).json({ errors: { user_id: "can't be blank" } });
+    if (!req.body.leaves) {
+      return res.status(422).json({ errors: { leaves: "can't be empty" } });
     }
 
-    if (!req.body.leave.leave_from_date) {
-      return res.status(422).json({ errors: { leave_from_date: "can't be blank" } });
-    }
+    req.body.leaves.forEach(leave => {
 
-    if (!req.body.leave.leave_to_date) {
-      return res.status(422).json({ errors: { leave_to_date: "can't be blank" } });
-    }
+      if (!leave.user_id) {
+        return res.status(422).json({ errors: { user_id: "can't be blank" } });
+      }
 
-    if (!req.body.leave.leave_count) {
-      return res.status(422).json({ errors: { leave_count: "can't be blank" } });
-    }
+      if (!leave.leave_from_date) {
+        return res.status(422).json({ errors: { leave_from_date: "can't be blank" } });
+      }
 
-    if (!req.body.leave.leave_type) {
-      return res.status(422).json({ errors: { leave_type: "can't be blank" } });
-    }
+      if (!leave.leave_to_date) {
+        return res.status(422).json({ errors: { leave_to_date: "can't be blank" } });
+      }
 
-    if (!req.body.leave.leave_status) {
-      return res.status(422).json({ errors: { leave_status: "can't be blank" } });
-    }
+      if (!leave.leave_count) {
+        return res.status(422).json({ errors: { leave_count: "can't be blank" } });
+      }
 
-    if (!req.body.leave.leave_approver_id) {
-      return res.status(422).json({ errors: { leave_approver_id: "can't be blank" } });
-    }
+      if (!leave.leave_type) {
+        return res.status(422).json({ errors: { leave_type: "can't be blank" } });
+      }
 
-    req.body.leave.leave_id = "LEAVE_" + new Date().getTime();
-    var leave = new Leave(req.body.leave);
+      if (!leave.leave_status) {
+        return res.status(422).json({ errors: { leave_status: "can't be blank" } });
+      }
 
-    return leave.save().then(function () {
-      return res.json({ status: "SUCCESS" });
+      if (!leave.leave_approver_id) {
+        return res.status(422).json({ errors: { leave_approver_id: "can't be blank" } });
+      }
+
+      leave.leave_id = "LEAVE_" + new Date().getTime();
+      var leave = new Leave(leave);
+
+      return leave.save().then(function () {
+      });
+
     });
+
+    return res.json({ status: "SUCCESS" });
+
   }).catch(next);
 });
 
@@ -113,22 +123,29 @@ router.get('/leader/:leaderId', auth.required, function (req, res, next) {
   });
 });
 
-//Update leave by leave id
+//Update leaves by leave id
 router.put('/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
-    Leave.findOne({ leave_id : req.body.leave.leave_id } )
-      .then(function (leave) {
+    if (!req.body.leaves) {
+      return res.status(422).json({ errors: { leaves: "can't be empty" } });
+    }
+
+    req.body.leaves.forEach(leave => {
+      Leave.findOne({ leave_id: leave.leave_id })
+      .then(function (foundLeave) {
         if (!leave) { return res.sendStatus(404); }
-        leave.leave_from_date = req.body.leave.leave_from_date;
-        leave.leave_to_date = req.body.leave.leave_to_date;
-        leave.leave_count = req.body.leave.leave_count;
-        leave.save()
-          .then(function (leave) {
-            return res.json({ status: "SUCCESS" });
-          }).catch(next);
+        foundLeave.leave_from_date = leave.leave_from_date;
+        foundLeave.leave_to_date = leave.leave_to_date;
+        foundLeave.leave_count = leave.leave_count;
+        foundLeave.save()
+        .then(function (result) {
+        }).catch(next);
       }).catch(next);
+    });
+
+    return res.json({ status: "SUCCESS" });
   }).catch(next);;
 });
 
@@ -137,7 +154,7 @@ router.put('/status', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
-    Leave.findOne({ leave_id : req.body.leave.leave_id } )
+    Leave.findOne({ leave_id: req.body.leave.leave_id })
       .then(function (leave) {
         if (!leave) { return res.sendStatus(404); }
         leave.leave_status = req.body.leave.leave_status;
