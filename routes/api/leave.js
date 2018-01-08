@@ -63,32 +63,32 @@ router.get('/user/:userId', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
+    setTimeout((function() {
+      var status = "";
 
-    var status = "";
-
-    if (typeof req.query.status !== 'undefined') {
-      status = req.query.status;
-      Leave.find(
-        { $and: [{ user_id: req.params.userId }, { leave_status: status }] })
-        .then(function (leaves) {
-          if (!leaves) { return res.sendStatus(404); }
-          return res.json({
-            leaves: leaves
-          });
-        }).catch(next);
-    }
-    else {
-      Leave.find(
-        { user_id: req.params.userId })
-        .then(function (leaves) {
-          if (!leaves) { return res.sendStatus(404); }
-          return res.json({
-            leaves: leaves
-          });
-        }).catch(next);
-    }
-
-
+      if (typeof req.query.status !== 'undefined') {
+        status = req.query.status;
+        Leave.find(
+          { $and: [{ user_id: req.params.userId }, { leave_status: status }] })
+          .then(function (leaves) {
+            if (!leaves) { return res.sendStatus(404); }
+            
+            return res.json({
+              leaves: leaves
+            });
+          }).catch(next);
+      }
+      else {
+        Leave.find(
+          { user_id: req.params.userId })
+          .then(function (leaves) {
+            if (!leaves) { return res.sendStatus(404); }
+            return res.json({
+              leaves: leaves
+            });
+          }).catch(next);
+      }
+    }), 4000);
   });
 });
 

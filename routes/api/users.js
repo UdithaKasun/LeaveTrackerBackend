@@ -53,7 +53,7 @@ router.post('/users/login', function(req, res, next){
 
     if(user){
       user.token = user.generateJWT();
-      return res.json({user: user.toAuthJSON()});
+      return res.json({user: user.toAuthJSON() ,leaderid : user.leaderId });
     } else {
       return res.status(422).json(info);
     }
