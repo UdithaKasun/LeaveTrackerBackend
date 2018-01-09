@@ -45,6 +45,8 @@ router.post('/', auth.required, function (req, res, next) {
       }
 
       leave.leave_id = "LEAVE_" + new Date().getTime();
+      
+      console.log("Leave ID : " + leave.leave_id);
       var leave = new Leave(leave);
 
       return leave.save().then(function () {
@@ -63,7 +65,6 @@ router.get('/user/:userId', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
-    setTimeout((function() {
       var status = "";
 
       if (typeof req.query.status !== 'undefined') {
@@ -88,7 +89,7 @@ router.get('/user/:userId', auth.required, function (req, res, next) {
             });
           }).catch(next);
       }
-    }), 4000);
+    
   });
 });
 
@@ -132,18 +133,36 @@ router.put('/', auth.required, function (req, res, next) {
       return res.status(422).json({ errors: { leaves: "can't be empty" } });
     }
 
-    req.body.leaves.forEach(leave => {
-      Leave.findOne({ leave_id: leave.leave_id })
-      .then(function (foundLeave) {
-        if (!leave) { return res.sendStatus(404); }
-        foundLeave.leave_from_date = leave.leave_from_date;
-        foundLeave.leave_to_date = leave.leave_to_date;
-        foundLeave.leave_count = leave.leave_count;
-        foundLeave.save()
-        .then(function (result) {
-        }).catch(next);
+
+    if (req.body.status == 'Delete') {
+      User.findById(req.payload.id).then(function (user) {
+        if (!user) { return res.sendStatus(401); }
+        req.body.leaves.forEach(leave => {
+          Leave.remove({ leave_id: leave })
+          .then(function (status) {
+            
+          })
+          .catch(next);
+        });
+        
       }).catch(next);
-    });
+    }else if(req.body.status == 'Update'){
+
+      req.body.leaves.forEach(leave => {
+        Leave.findOne({ leave_id: leave.leave_id })
+        .then(function (foundLeave) {
+          if (!leave) { return res.sendStatus(404); }
+          foundLeave.leave_from_date = leave.leave_from_date;
+          foundLeave.leave_to_date = leave.leave_to_date;
+          foundLeave.leave_count = leave.leave_count;
+          foundLeave.save()
+          .then(function (result) {
+          }).catch(next);
+        }).catch(next);
+      });
+      
+    }
+  
 
     return res.json({ status: "SUCCESS" });
   }).catch(next);;
@@ -164,6 +183,20 @@ router.put('/status', auth.required, function (req, res, next) {
           }).catch(next);
       }).catch(next);
   }).catch(next);;
+});
+
+router.post('/test/removeLeaves', auth.required, function (req, res, next) {
+  User.findById(req.payload.id).then(function (user) {
+    if (!user) { return res.sendStatus(401); }
+    req.body.leaves.forEach(leave => {
+      Leave.remove({ leave_id: leave })
+      .then(function (status) {
+        
+      })
+      .catch(next);
+    });
+    return res.json({ status: "SUCCESS" });
+  }).catch(next);
 });
 
 
