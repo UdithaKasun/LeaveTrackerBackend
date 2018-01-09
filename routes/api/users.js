@@ -3,6 +3,8 @@ var router = require('express').Router();
 var passport = require('passport');
 var User = mongoose.model('User');
 var auth = require('../auth');
+var mailsender = require('.././../mailhub/mailer');
+var generatePassword = require('password-generator');
 
 router.get('/user', auth.required, function(req, res, next){
   User.findById(req.payload.id).then(function(user){
@@ -50,6 +52,8 @@ router.put('/user', auth.required, function(req, res, next){
 });
 
 router.post('/users/login', function(req, res, next){
+
+ 
   if(!req.body.user.username){
     return res.status(422).json({errors: {username: "can't be blank"}});
   }
@@ -70,15 +74,25 @@ router.post('/users/login', function(req, res, next){
     }
   })(req, res, next);
 });
+ 
 
 router.post('/users', function(req, res, next){
   var user = new User();
 
   user.username = req.body.user.username;
-  user.setPassword(req.body.user.password);
+  user.userrole = req.body.user.userrole;
+  var password = generatePassword(10,false);
+  user.setPassword(password);
 
   user.save().then(function(){
-    return res.json({user: user.toAuthJSON()});
+    mailsender.sendNewAccountCreated(user.username,user.username,password)
+    .then(sendStatus => {
+      return res.json({user: user.toAuthJSON()});
+    })
+    .catch(err => {
+      return status(500);
+    })
+    
   }).catch(next);
 });
 
