@@ -14,6 +14,23 @@ router.get('/user', auth.required, function(req, res, next){
   }).catch(next);
 });
 
+router.get('/leaders', auth.required, function(req, res, next){
+  User.findById(req.payload.id).then(function(user){
+    if(!user){ return res.sendStatus(401); }
+
+    User.find(   
+      { userrole : "Leader" })
+      .then(function (users) {
+        if (!users) { return res.sendStatus(404); }
+        var filteredLeads = users.map(item => {
+          return item.username;
+        })
+        return res.json(filteredLeads);
+      }).catch(next);
+
+  }).catch(next);
+});
+
 router.get('/user/:leaderid', auth.required, function(req, res, next){
    User.findById(req.payload.id).then(function(user){
     if(!user){ return res.sendStatus(401); }
