@@ -12,6 +12,22 @@ router.get('/user', auth.required, function(req, res, next){
   }).catch(next);
 });
 
+router.get('/user/:leaderid', auth.required, function(req, res, next){
+   User.findById(req.payload.id).then(function(user){
+    if(!user){ return res.sendStatus(401); }
+
+    User.find(   
+      { leaderId: req.params.leaderid },{username : 1})
+      .then(function (users) {
+        if (!users) { return res.sendStatus(404); }
+        return res.json({
+          users: users
+        });
+      }).catch(next);
+  }).catch(next);
+});
+
+
 router.put('/user', auth.required, function(req, res, next){
   User.findById(req.payload.id).then(function(user){
     if(!user){ return res.sendStatus(401); }
@@ -20,19 +36,13 @@ router.put('/user', auth.required, function(req, res, next){
     if(typeof req.body.user.username !== 'undefined'){
       user.username = req.body.user.username;
     }
-    if(typeof req.body.user.email !== 'undefined'){
-      user.email = req.body.user.email;
+    if(typeof req.body.user.leaderId !== 'undefined'){
+      user.leaderId = req.body.user.leaderId;
     }
-    if(typeof req.body.user.bio !== 'undefined'){
-      user.bio = req.body.user.bio;
+    if(typeof req.body.user.userrole !== 'undefined'){
+      user.userrole = req.body.user.userrole;
     }
-    if(typeof req.body.user.image !== 'undefined'){
-      user.image = req.body.user.image;
-    }
-    if(typeof req.body.user.password !== 'undefined'){
-      user.setPassword(req.body.user.password);
-    }
-
+   
     return user.save().then(function(){
       return res.json({user: user.toAuthJSON()});
     });
