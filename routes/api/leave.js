@@ -10,11 +10,11 @@ router.post('/', auth.required, function (req, res, next) {
   User.findById(req.payload.id).then(function (user) {
     if (!user) { return res.sendStatus(401); }
 
-    if (!req.body.leaves) {
-      return res.status(422).json({ errors: { leaves: "can't be empty" } });
+    if (!req.body.newLeaves) {
+      return res.status(422).json({ errors: { newLeaves: "can't be empty" } });
     }
 
-    req.body.leaves.forEach(leave => {
+    req.body.newLeaves.forEach(leave => {
 
       if (!leave.user_id) {
         return res.status(422).json({ errors: { user_id: "can't be blank" } });
@@ -54,6 +54,27 @@ router.post('/', auth.required, function (req, res, next) {
 
     });
 
+    req.body.removeLeaves.forEach(leave => {
+      Leave.remove({ leave_id: leave })
+        .then(function (status) {
+
+        })
+        .catch(next);
+    });
+
+    req.body.existLeaves.forEach(leave => {
+      Leave.findOne({ leave_id: leave.leave_id })
+        .then(function (foundLeave) {
+          if (!leave) { return res.sendStatus(404); }
+          foundLeave.leave_from_date = leave.leave_from_date;
+          foundLeave.leave_to_date = leave.leave_to_date;
+          foundLeave.leave_count = leave.leave_count;
+          foundLeave.save()
+            .then(function (result) {
+            }).catch(next);
+        }).catch(next);
+    });
+
     return res.json({ status: "SUCCESS" });
 
   }).catch(next);
@@ -80,16 +101,17 @@ router.get('/user/:userId', auth.required, function (req, res, next) {
         }).catch(next);
     }
     else {
-      Leave.find(
-        { user_id: req.params.userId })
-        .then(function (leaves) {
-          if (!leaves) { return res.sendStatus(404); }
-          return res.json({
-            leaves: leaves
-          });
-        }).catch(next);
+      setTimeout(()=>{
+        Leave.find(
+          { user_id: req.params.userId })
+          .then(function (leaves) {
+            if (!leaves) { return res.sendStatus(404); }
+            return res.json({
+              leaves: leaves
+            });
+          }).catch(next);
+      },1000);
     }
-
   });
 });
 
@@ -137,13 +159,7 @@ router.put('/', auth.required, function (req, res, next) {
     if (req.body.status == 'Delete') {
       User.findById(req.payload.id).then(function (user) {
         if (!user) { return res.sendStatus(401); }
-        req.body.leaves.forEach(leave => {
-          Leave.remove({ leave_id: leave })
-            .then(function (status) {
 
-            })
-            .catch(next);
-        });
 
       }).catch(next);
     } else if (req.body.status == 'Update') {

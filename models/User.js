@@ -9,7 +9,7 @@ var UserSchema = new mongoose.Schema({
   hash: String,
   salt: String,
   userrole : String,
-  leaderId : String
+  leaderid : String
 }, {timestamps: true});
 
 UserSchema.plugin(uniqueValidator, {message: 'is already taken.'});

@@ -7,8 +7,8 @@ var emailConfig = {
     port: 587,     // secure SMTP
     secure: false, // false for TLS - as a boolean not string - but the default is false so just remove this completely
     auth: {
-        user: "",
-        pass: ""
+        user: "it15002884@my.sliit.lk",
+        pass: "2wsx!QAZ@90"
     },
     requireTLS: true,
     tls: {

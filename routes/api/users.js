@@ -58,12 +58,10 @@ router.get('/user/:leaderid', auth.required, function(req, res, next){
     if(!user){ return res.sendStatus(401); }
 
     User.find(   
-      { leaderId: req.params.leaderid },{username : 1})
+      { leaderid: req.params.leaderid },{username : 1})
       .then(function (users) {
         if (!users) { return res.sendStatus(404); }
-        return res.json({
-          users: users
-        });
+        return res.json(users);
       }).catch(next);
   }).catch(next);
 });
@@ -107,7 +105,7 @@ router.post('/users/login', function(req, res, next){
     if(user){
       user.token = user.generateJWT();
       console.log(user);
-      return res.json({user: user.toAuthJSON() ,leaderid : user.leaderId });
+      return res.json({user: user.toAuthJSON() ,leaderid : user.leaderid , role : user.userrole});
     } else {
       return res.status(422).json(info);
     }
@@ -120,6 +118,7 @@ router.post('/users', function(req, res, next){
 
   user.username = req.body.user.username;
   user.userrole = req.body.user.userrole;
+  user.leaderid = req.body.user.leaderid;
   var password = generatePassword(10,false);
   user.setPassword(password);
 
