@@ -2,6 +2,7 @@ var router = require('express').Router();
 
 router.use('/', require('./users'));
 router.use('/leaves', require('./leave'));
+router.use('/notifications', require('./notification'));
 
 router.use(function(err, req, res, next){
   if(err.name === 'ValidationError'){

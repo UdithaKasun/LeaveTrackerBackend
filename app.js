@@ -65,6 +65,7 @@ process.on('SIGINT', function () {
 
 require('./models/User');
 require('./models/Leave');
+require('./models/NotificationEvent');
 require('./config/passport');
 
 app.use(require('./routes'));

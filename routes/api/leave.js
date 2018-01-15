@@ -4,6 +4,7 @@ var router = require('express').Router();
 var Leave = mongoose.model('Leave');
 var User = mongoose.model('User');
 var auth = require('../auth');
+var Notification = mongoose.model('Notification');
 
 //Add new leaves to the database
 router.post('/', auth.required, function (req, res, next) {
@@ -101,7 +102,6 @@ router.get('/user/:userId', auth.required, function (req, res, next) {
         }).catch(next);
     }
     else {
-      setTimeout(()=>{
         Leave.find(
           { user_id: req.params.userId })
           .then(function (leaves) {
@@ -110,7 +110,7 @@ router.get('/user/:userId', auth.required, function (req, res, next) {
               leaves: leaves
             });
           }).catch(next);
-      },1000);
+      
     }
   });
 });
@@ -195,7 +195,25 @@ router.put('/status', auth.required, function (req, res, next) {
         leave.leave_status = req.body.leave.leave_status;
         leave.save()
           .then(function (leave) {
-            return res.json({ status: "SUCCESS" });
+            var notification = {};
+            notification['notification_id'] = "MSG" + new Date().getTime();
+            notification['reciever_user_id'] = leave.user_id;
+            notification['status'] = "NEW";
+            var fromDate = new Date(leave.leave_from_date).setDate(new Date(leave.leave_from_date).getDate() + 1);
+            if(leave.leave_status == "APPROVED"){
+              notification['type'] = "success";
+              notification['message'] = `Your Leave Request for ${new Date(fromDate).toISOString().slice(0, 10)} to ${new Date(leave.leave_to_date).toISOString().slice(0, 10)} has been Approved.`
+            }
+            else if(leave.leave_status == "REJECTED"){
+              notification['type'] = "danger";
+              notification['message'] = `Your Leave Request for ${new Date(fromDate).toISOString().slice(0, 10)} to ${new Date(leave.leave_to_date).toISOString().slice(0, 10)} has been Declined.`
+            }
+
+            var newNotification = new Notification(notification);
+
+            return newNotification.save().then(function () {
+              return res.json({ status: "SUCCESS" });
+            });
           }).catch(next);
       }).catch(next);
   }).catch(next);;
