@@ -53,6 +53,25 @@ router.get('/leaders', auth.required, function(req, res, next){
   }).catch(next);
 });
 
+router.get('/systemusers', auth.required, function(req, res, next){
+  User.findById(req.payload.id).then(function(user){
+    if(!user){ return res.sendStatus(401); }
+    User.find(   
+      { $or: [{ userrole: "Member" }, { userrole: "Leader" }] })
+      .then(function (users) {
+        var output = users.map(originalUser => {
+          var newUser = {};
+          newUser['username'] = originalUser.username;
+          newUser['userrole'] = originalUser.userrole;
+          newUser['leaderid'] = originalUser.leaderid;
+
+          return newUser;
+        })
+        return res.json(output);
+      }).catch(next);
+  }).catch(next);
+});
+
 router.get('/user/:leaderid', auth.required, function(req, res, next){
    User.findById(req.payload.id).then(function(user){
     if(!user){ return res.sendStatus(401); }
@@ -67,24 +86,31 @@ router.get('/user/:leaderid', auth.required, function(req, res, next){
 });
 
 
-router.put('/user', auth.required, function(req, res, next){
+router.put('/users', auth.required, function(req, res, next){
   User.findById(req.payload.id).then(function(user){
     if(!user){ return res.sendStatus(401); }
 
     // only update fields that were actually passed...
-    if(typeof req.body.user.username !== 'undefined'){
-      user.username = req.body.user.username;
-    }
-    if(typeof req.body.user.leaderId !== 'undefined'){
-      user.leaderId = req.body.user.leaderId;
-    }
-    if(typeof req.body.user.userrole !== 'undefined'){
-      user.userrole = req.body.user.userrole;
-    }
+    
    
-    return user.save().then(function(){
-      return res.json({user: user.toAuthJSON()});
-    });
+    User.findOne(   
+      { username: req.body.user.username })
+      .then(function (user) {
+        if(typeof req.body.user.username !== 'undefined'){
+          user.username = req.body.user.username;
+        }
+        if(typeof req.body.user.leaderid !== 'undefined'){
+          user.leaderid = req.body.user.leaderid;
+        }
+        if(typeof req.body.user.userrole !== 'undefined'){
+          user.userrole = req.body.user.userrole;
+        }
+        if (!user) { return res.sendStatus(404); }
+        user.save().then(function(){
+          return res.json({ status: "SUCCESS" });
+        })
+        .catch(next);
+      }).catch(next);
   }).catch(next);
 });
 
