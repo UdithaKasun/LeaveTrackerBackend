@@ -39,6 +39,27 @@ var mailOptions = {
 return transporter.sendMail(mailOptions);
 }
 
+mailsender.sendAccountReset = function(reciever,username,password){
+    // setup e-mail data
+var mailOptions = {
+    from: emailConfig.auth.user, // sender address (who sends)
+    to: reciever, // list of receivers (who receives)
+    subject: 'Leave Tracker Account Reset', // Subject line
+    text: 'Hello world ', // plaintext body
+    html: `
+    <h4>Leave Tracker Account Reset</h4>
+			<p>Password for your Leave Tracker Application has been reset as following</p>
+			<p>
+				<b>User Name :  ${username} </b>
+			</p>
+			<p>
+				<b>Password : ${password} </b>
+			</p>`
+};
+
+return transporter.sendMail(mailOptions);
+}
+
 
 
 
